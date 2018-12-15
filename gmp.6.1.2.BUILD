@@ -17,3 +17,15 @@ genrule(
     """,
     visibility = ["//visibility:public"],
 )
+
+### gen-fib
+cc_library(
+    name = "gen_fib_deps",
+    srcs = ["gen-fib.c"],
+    hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
+)
+cc_binary(
+    name = "gen_fib",
+    deps = [":gen_fib_deps"],
+    visibility = ["//visibility:public"],
+)
