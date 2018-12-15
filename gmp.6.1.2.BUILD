@@ -256,14 +256,19 @@ cc_library(
         ":gen_mp_bases_h",
         "gmp-impl.h"
     ],
+    alwayslink = 1,
     copts = ["-Wno-unused-but-set-variable"],
+    visibility = ["//visibility:public"],
 )
 
 ################################################################################
 
 ### gmp
-cc_library(
-    name = "gmp",
+# Need to build it like binary, as bazel doesnt support loading symbols from
+# transitive static dependencies.
+# Refer: https://docs.google.com/document/d/1d4SPgVX-OTCiEK_l24DNWiFlT14XS5ZxD7XhttFbvrI/
+cc_binary(
+    name = "libgmp.so",
     srcs = [
         "assert.c",
         "compat.c",
@@ -280,109 +285,27 @@ cc_library(
         "version.c",
         "nextprime.c",
         "primesieve.c",
+        "gmp-impl.h",
+        "longlong.h",
+        ":gmp_hdrs",
+        ":gen_fib_table_h",
+        ":gen_fac_table_h",
+        ":gen_mp_bases_h",
     ],
-    hdrs = ["gmp-impl.h", "longlong.h"],
+    linkopts = ["-shared"],
     deps = [":mpf", ":mpz", ":mpq", ":mpn", ":printf", ":scanf", ":random"],
     visibility = ["//visibility:public"],
+    copts = ["-Wno-unused-variable"],
 )
 
 ### gmpxx
-cc_library(
-    name = "gmpxx",
-    srcs = ["cxx/dummy.cc"],
-    deps = [":gmp", ":cxx"],
+# Need to build it like binary, as bazel doesnt support loading symbols from
+# transitive static dependencies.
+# Refer: https://docs.google.com/document/d/1d4SPgVX-OTCiEK_l24DNWiFlT14XS5ZxD7XhttFbvrI/
+cc_binary(
+    name = "libgmpxx.so",
+    srcs = ["cxx/dummy.cc", ":libgmp.so"],
+    deps = [":cxx"],
+    linkopts = ["-shared"],
     visibility = ["//visibility:public"],
-)
-
-### tests
-cc_library(
-    name = "tests",
-    srcs = [
-        "tests/memory.c",
-        "tests/misc.c",
-        "tests/refmpf.c",
-        "tests/refmpn.c",
-        "tests/refmpq.c",
-        "tests/refmpz.c",
-        "tests/spinner.c",
-        "tests/trace.c",
-        "tests/tests.h",
-#        "tests/amd64call.asm",
-#        "tests/amd64check.c",
-#        "tests/x86call.asm",
-#        "tests/x86check.c",
-#        "tests/arm32call.asm",
-#        "tests/arm32check.c",
-    ],
-    deps = [":gmp"],
-    visibility = ["//visibility:public"],
-    copts = ["-Wno-unused-but-set-variable"],
-)
-
-################################################################################
-
-### speed
-
-cc_library(
-    name = "speed",
-    srcs = [
-        "tune/common.c",
-        "tune/divrem1div.c",
-        "tune/divrem1inv.c",
-        "tune/divrem2div.c",
-        "tune/divrem2inv.c",
-        "tune/div_qr_1n_pi1_1.c",
-        "tune/div_qr_1n_pi1_2.c",
-        "tune/div_qr_1_tune.c",
-        "tune/freq.c",
-        "tune/gcdext_single.c",
-        "tune/gcdext_double.c",
-        "tune/gcdextod.c",
-        "tune/gcdextos.c",
-        "tune/hgcd_lehmer.c",
-        "tune/hgcd_appr_lehmer.c",
-        "tune/hgcd_reduce_1.c",
-        "tune/hgcd_reduce_2.c",
-        "tune/jacbase1.c",
-        "tune/jacbase2.c",
-        "tune/jacbase3.c",
-        "tune/jacbase4.c",
-        "tune/mod_1_div.c",
-        "tune/mod_1_inv.c",
-        "tune/mod_1_1-1.c",
-        "tune/mod_1_1-2.c",
-        "tune/modlinv.c",
-        "tune/noop.c",
-        "tune/powm_mod.c",
-        "tune/powm_redc.c",
-        "tune/pre_divrem_1.c",
-        "tune/set_strb.c",
-        "tune/set_strs.c",
-        "tune/set_strp.c",
-        "tune/time.c",
-    ],
-    hdrs = [
-        ":gmp_hdrs",
-        "gmp-impl.h",
-        "mpn/generic/divrem_1.c",
-        "mpn/generic/divrem_2.c",
-        "mpn/generic/div_qr_1.c",
-        "mpn/generic/div_qr_1n_pi1.c",
-        "mpn/generic/gcdext.c",
-        "mpn/generic/hgcd.c",
-        "mpn/generic/hgcd_appr.c",
-        "mpn/generic/hgcd_reduce.c",
-        "mpn/generic/jacbase.c",
-        "mpn/generic/mod_1.c",
-        "mpn/generic/mod_1_1.c",
-        "mpn/generic/set_str.c",
-        "mpz/powm.c",
-        "mp_clz_tab.c",
-        "tests/tests.h",
-        "tune/speed.h",
-    ],
-    deps = [":tests", ":gmp"],
-    includes = ["tests"],
-    visibility = ["//visibility:public"],
-    copts = ["-Wno-unused-variable", "-Wno-unused-but-set-variable", "-Wno-maybe-uninitialized", "-Wno-unused-value"],
 )
