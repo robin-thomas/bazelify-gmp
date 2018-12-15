@@ -87,6 +87,15 @@ cc_library(
 
 ################################################################################
 
+### cxx
+cc_library(
+    name = "cxx",
+    srcs = glob(["cxx/*.cc"]),
+    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + ["gmp-impl.h"],
+    copts = ["-Wno-unused-but-set-variable"],
+    visibility = ["//visibility:public"],
+)
+
 ### mpf
 cc_library(
     name = "mpf",
