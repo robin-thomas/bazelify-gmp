@@ -185,6 +185,14 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 
+### mpn
+cc_library(
+    name = "mpn",
+    srcs = [":gen_fib_table_c", ":gen_mp_bases_c"],
+    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h", "gmp-impl.h"],
+    visibility = ["//visibility:public"],
+)
+
 ### mpq
 cc_library(
     name = "mpq",
@@ -227,3 +235,5 @@ cc_library(
     copts = ["-Wno-unused-but-set-variable"],
     visibility = ["//visibility:public"],
 )
+
+################################################################################
