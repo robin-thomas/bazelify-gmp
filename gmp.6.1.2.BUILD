@@ -243,3 +243,11 @@ cc_library(
     deps = [":mpf", ":mpz", ":mpq", ":mpn", ":printf", ":scanf", ":random"],
     visibility = ["//visibility:public"],
 )
+
+### gmpxx
+cc_library(
+    name = "gmpxx",
+    srcs = ["cxx/dummy.cc"],
+    deps = [":gmp", ":cxx"],
+    visibility = ["//visibility:public"],
+)
