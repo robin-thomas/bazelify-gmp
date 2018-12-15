@@ -17,6 +17,29 @@ genrule(
     visibility = ["//visibility:public"],
 )
 
+### fac_table.h
+#TODO: figure out how to get the value of 64 and 0 from configure script
+genrule(
+    name = "gen_fac_table_h",
+    outs = ["fac_table.h"],
+    tools = [":gen_fac"],
+    cmd = """
+        $(location gen_fac) 64 0 > $@
+    """,
+    visibility = ["//visibility:public"],
+)
+cc_binary(
+    name = "gen_fac",
+    deps = [":gen_fac_deps"],
+    visibility = ["//visibility:public"],
+)
+cc_library(
+    name = "gen_fac_deps",
+    srcs = ["gen-fac.c"],
+    hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
+    copts = ["-Wno-unused-variable"],
+)
+
 ### fib-table.*
 #TODO: figure out how to get the value of 64 and 0 from configure script
 genrule(
@@ -48,25 +71,23 @@ cc_library(
     copts = ["-Wno-unused-variable"],
 )
 
-### gen-fac
-#TODO: figure out how to get the value of 64 and 0 from configure script
+### jacobitab.h
 genrule(
-    name = "gen_fac_table_h",
-    outs = ["fac_table.h"],
-    tools = [":gen_fac"],
+    name = "gen_jacobitab_h",
+    outs = ["jacobitab.h"],
+    tools = [":gen_jacobitab"],
     cmd = """
-        $(location gen_fac) 64 0 > $@
+        $(location gen_jacobitab) > $@
     """,
     visibility = ["//visibility:public"],
 )
 cc_binary(
-    name = "gen_fac",
-    deps = [":gen_fac_deps"],
-    visibility = ["//visibility:public"],
+    name = "gen_jacobitab",
+    deps = [":gen_jacobitab_deps"],
 )
 cc_library(
-    name = "gen_fac_deps",
-    srcs = ["gen-fac.c"],
+    name = "gen_jacobitab_deps",
+    srcs = ["gen-jacobitab.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
     copts = ["-Wno-unused-variable"],
 )
@@ -99,6 +120,48 @@ cc_binary(
 cc_library(
     name = "gen_bases_deps",
     srcs = ["gen-bases.c"],
+    hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
+    copts = ["-Wno-unused-variable"],
+)
+
+### perfsqr.h
+genrule(
+    name = "gen_perfsqr_h",
+    outs = ["perfsqr.h"],
+    tools = [":gen_perfsqr"],
+    cmd = """
+        $(location gen_perfsqr) > $@
+    """,
+    visibility = ["//visibility:public"],
+)
+cc_binary(
+    name = "gen_perfsqr",
+    deps = [":gen_perfsqr_deps"],
+)
+cc_library(
+    name = "gen_perfsqr_deps",
+    srcs = ["gen-perfsqr.c"],
+    hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
+    copts = ["-Wno-unused-variable"],
+)
+
+### trialdivtab.h
+genrule(
+    name = "gen_trialdivtab_h",
+    outs = ["trialdivtab.h"],
+    tools = [":gen_trialdivtab"],
+    cmd = """
+        $(location gen_trialdivtab) 64 8000 > $@
+    """,
+    visibility = ["//visibility:public"],
+)
+cc_binary(
+    name = "gen_trialdivtab",
+    deps = [":gen_trialdivtab_deps"],
+)
+cc_library(
+    name = "gen_trialdivtab_deps",
+    srcs = ["gen-trialdivtab.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
     copts = ["-Wno-unused-variable"],
 )
