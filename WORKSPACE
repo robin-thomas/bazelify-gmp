@@ -1,6 +1,6 @@
-#load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-new_http_archive(
+http_archive(
     name = "gmp_6_1_2",
     url = "https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz",
     strip_prefix = "gmp-6.1.2",

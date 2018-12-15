@@ -1,3 +1,6 @@
+# Unable to get the new http_archive gets working unless the BUILD
+# file is under external/
+# Refer: https://stackoverflow.com/questions/51802681/does-bazel-need-external-repo-build-files-to-be-in-workspace-root-external
 genrule(
     name = "gmp_hdrs",
     srcs = glob(["**/*"]),

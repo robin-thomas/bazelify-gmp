@@ -2,6 +2,6 @@
 filegroup(
     name = "dummy_rule",
     srcs = [
-        "@gmp_6_1_2//:libgmpxx.so",
+        "@gmp_6_1_2//:libgmp.so",
     ],
 )
