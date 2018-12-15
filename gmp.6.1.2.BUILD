@@ -14,7 +14,6 @@ genrule(
         cp external/gmp_6_1_2/gmp.h $(location gmp.h)
         cp external/gmp_6_1_2/gmp-mparam.h $(location gmp-mparam.h)
     """,
-    visibility = ["//visibility:public"],
 )
 
 ### fac_table.h
@@ -26,12 +25,10 @@ genrule(
     cmd = """
         $(location gen_fac) 64 0 > $@
     """,
-    visibility = ["//visibility:public"],
 )
 cc_binary(
     name = "gen_fac",
     deps = [":gen_fac_deps"],
-    visibility = ["//visibility:public"],
 )
 cc_library(
     name = "gen_fac_deps",
@@ -49,7 +46,6 @@ genrule(
     cmd = """
         $(location gen_fib) table 64 0 > $@
     """,
-    visibility = ["//visibility:public"],
 )
 genrule(
     name = "gen_fib_table_h",
@@ -58,7 +54,6 @@ genrule(
     cmd = """
         $(location gen_fib) header 64 0 > $@
     """,
-    visibility = ["//visibility:public"],
 )
 cc_binary(
     name = "gen_fib",
@@ -79,7 +74,6 @@ genrule(
     cmd = """
         $(location gen_jacobitab) > $@
     """,
-    visibility = ["//visibility:public"],
 )
 cc_binary(
     name = "gen_jacobitab",
@@ -101,7 +95,6 @@ genrule(
     cmd = """
         $(location gen_bases) table 64 0 > $@
     """,
-    visibility = ["//visibility:public"],
 )
 genrule(
     name = "gen_mp_bases_h",
@@ -110,12 +103,10 @@ genrule(
     cmd = """
         $(location gen_bases) header 64 0 > $@
     """,
-    visibility = ["//visibility:public"],
 )
 cc_binary(
     name = "gen_bases",
     deps = [":gen_bases_deps"],
-    visibility = ["//visibility:public"],
 )
 cc_library(
     name = "gen_bases_deps",
@@ -132,7 +123,6 @@ genrule(
     cmd = """
         $(location gen_perfsqr) > $@
     """,
-    visibility = ["//visibility:public"],
 )
 cc_binary(
     name = "gen_perfsqr",
@@ -153,7 +143,6 @@ genrule(
     cmd = """
         $(location gen_trialdivtab) 64 8000 > $@
     """,
-    visibility = ["//visibility:public"],
 )
 cc_binary(
     name = "gen_trialdivtab",
@@ -174,7 +163,6 @@ cc_library(
     srcs = glob(["cxx/*.cc"]),
     hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + ["gmp-impl.h"],
     copts = ["-Wno-unused-but-set-variable"],
-    visibility = ["//visibility:public"],
 )
 
 ### mpf
@@ -182,7 +170,6 @@ cc_library(
     name = "mpf",
     srcs = glob(["mpf/*.c"]),
     hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + glob(["mpf/*.h", "gmp-impl.h", "longlong.h"]),
-    visibility = ["//visibility:public"],
 )
 
 ### mpn
@@ -190,7 +177,6 @@ cc_library(
     name = "mpn",
     srcs = [":gen_fib_table_c", ":gen_mp_bases_c"],
     hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h", "gmp-impl.h"],
-    visibility = ["//visibility:public"],
 )
 
 ### mpq
@@ -198,7 +184,6 @@ cc_library(
     name = "mpq",
     srcs = glob(["mpq/*.c"]),
     hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + glob(["mpq/*.h", "gmp-impl.h", "longlong.h"]),
-    visibility = ["//visibility:public"],
 )
 
 ### mpz
@@ -206,7 +191,6 @@ cc_library(
     name = "mpz",
     srcs = glob(["mpz/*.c"]),
     hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + glob(["mpz/*.h", "gmp-impl.h", "longlong.h"]),
-    visibility = ["//visibility:public"],
 )
 
 ### printf
@@ -215,7 +199,6 @@ cc_library(
     srcs = glob(["printf/*.c"]),
     hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h", "gmp-impl.h", "longlong.h"],
     copts = ["-Wno-unused-but-set-variable"],
-    visibility = ["//visibility:public"],
 )
 
 ### random
@@ -224,7 +207,6 @@ cc_library(
     srcs = glob(["rand/*.c", "rand/*.h"]),
     hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h", "gmp-impl.h", "longlong.h"],
     copts = ["-Wno-unused-but-set-variable"],
-    visibility = ["//visibility:public"],
 )
 
 ### scanf
@@ -233,7 +215,31 @@ cc_library(
     srcs = glob(["scanf/*.c"]),
     hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h", "gmp-impl.h"],
     copts = ["-Wno-unused-but-set-variable"],
-    visibility = ["//visibility:public"],
 )
 
 ################################################################################
+
+### gmp
+cc_library(
+    name = "gmp",
+    srcs = [
+        "assert.c",
+        "compat.c",
+        "errno.c",
+        "extract-dbl.c",
+        "invalid.c",
+        "memory.c",
+        "mp_bpl.c",
+        "mp_clz_tab.c",
+        "mp_dv_tab.c",
+        "mp_minv_tab.c",
+        "mp_get_fns.c",
+        "mp_set_fns.c",
+        "version.c",
+        "nextprime.c",
+        "primesieve.c",
+    ],
+    hdrs = ["gmp-impl.h", "longlong.h"],
+    deps = [":mpf", ":mpz", ":mpq", ":mpn", ":printf", ":scanf", ":random"],
+    visibility = ["//visibility:public"],
+)
