@@ -161,7 +161,11 @@ cc_library(
 cc_library(
     name = "cxx",
     srcs = glob(["cxx/*.cc"]),
-    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + ["gmp-impl.h"],
+    hdrs = [
+        ":gmp_hdrs",
+        ":gen_fib_table_h",
+        ":gen_fac_table_h",
+        ":gen_mp_bases_h"] + ["gmp-impl.h"],
     copts = ["-Wno-unused-but-set-variable"],
 )
 
@@ -169,35 +173,60 @@ cc_library(
 cc_library(
     name = "mpf",
     srcs = glob(["mpf/*.c"]),
-    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + glob(["mpf/*.h", "gmp-impl.h", "longlong.h"]),
+    hdrs = [
+        ":gmp_hdrs",
+        ":gen_fib_table_h",
+        ":gen_fac_table_h",
+        ":gen_mp_bases_h"] + glob(["mpf/*.h", "gmp-impl.h", "longlong.h"]),
 )
 
 ### mpn
 cc_library(
     name = "mpn",
     srcs = [":gen_fib_table_c", ":gen_mp_bases_c"],
-    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h", "gmp-impl.h"],
+    hdrs = [
+        ":gmp_hdrs",
+        ":gen_fib_table_h",
+        ":gen_fac_table_h",
+        ":gen_mp_bases_h",
+        "gmp-impl.h"
+    ],
 )
 
 ### mpq
 cc_library(
     name = "mpq",
     srcs = glob(["mpq/*.c"]),
-    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + glob(["mpq/*.h", "gmp-impl.h", "longlong.h"]),
+    hdrs = [
+        ":gmp_hdrs",
+        ":gen_fib_table_h",
+        ":gen_fac_table_h",
+        ":gen_mp_bases_h"] + glob(["mpq/*.h", "gmp-impl.h", "longlong.h"]),
 )
 
 ### mpz
 cc_library(
     name = "mpz",
     srcs = glob(["mpz/*.c"]),
-    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + glob(["mpz/*.h", "gmp-impl.h", "longlong.h"]),
+    hdrs = [
+        ":gmp_hdrs",
+        ":gen_fib_table_h",
+        ":gen_fac_table_h",
+        ":gen_mp_bases_h"] + glob(["mpz/*.h", "gmp-impl.h", "longlong.h"]),
 )
 
 ### printf
 cc_library(
     name = "printf",
     srcs = glob(["printf/*.c"]),
-    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h", "gmp-impl.h", "longlong.h"],
+    hdrs = [
+        ":gmp_hdrs",
+        ":gen_fib_table_h",
+        ":gen_fac_table_h",
+        ":gen_mp_bases_h",
+        "gmp-impl.h",
+        "longlong.h"
+    ],
     copts = ["-Wno-unused-but-set-variable"],
 )
 
@@ -205,7 +234,14 @@ cc_library(
 cc_library(
     name = "random",
     srcs = glob(["rand/*.c", "rand/*.h"]),
-    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h", "gmp-impl.h", "longlong.h"],
+    hdrs = [
+        ":gmp_hdrs",
+        ":gen_fib_table_h",
+        ":gen_fac_table_h",
+        ":gen_mp_bases_h",
+        "gmp-impl.h",
+        "longlong.h"
+    ],
     copts = ["-Wno-unused-but-set-variable"],
 )
 
@@ -213,7 +249,13 @@ cc_library(
 cc_library(
     name = "scanf",
     srcs = glob(["scanf/*.c"]),
-    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h", "gmp-impl.h"],
+    hdrs = [
+        ":gmp_hdrs",
+        ":gen_fib_table_h",
+        ":gen_fac_table_h",
+        ":gen_mp_bases_h",
+        "gmp-impl.h"
+    ],
     copts = ["-Wno-unused-but-set-variable"],
 )
 
