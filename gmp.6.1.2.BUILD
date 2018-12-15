@@ -29,3 +29,15 @@ cc_binary(
     deps = [":gen_fib_deps"],
     visibility = ["//visibility:public"],
 )
+
+### gen-fac
+cc_library(
+    name = "gen_fac_deps",
+    srcs = ["gen-fac.c"],
+    hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
+)
+cc_binary(
+    name = "gen_fac",
+    deps = [":gen_fac_deps"],
+    visibility = ["//visibility:public"],
+)
