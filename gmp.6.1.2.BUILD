@@ -17,8 +17,17 @@ genrule(
     visibility = ["//visibility:public"],
 )
 
-### fib-table.h
+### fib-table.*
 #TODO: figure out how to get the value of 64 and 0 from configure script
+genrule(
+    name = "gen_fib_table_c",
+    outs = ["fib_table.c"],
+    tools = [":gen_fib"],
+    cmd = """
+        $(location gen_fib) table 64 0 > $@
+    """,
+    visibility = ["//visibility:public"],
+)
 genrule(
     name = "gen_fib_table_h",
     outs = ["fib_table.h"],
@@ -62,8 +71,17 @@ cc_library(
     copts = ["-Wno-unused-variable"],
 )
 
-### gen-bases
+### mp_bases.*
 #TODO: figure out how to get the value of 64 and 0 from configure script
+genrule(
+    name = "gen_mp_bases_c",
+    outs = ["mp_bases.c"],
+    tools = [":gen_bases"],
+    cmd = """
+        $(location gen_bases) table 64 0 > $@
+    """,
+    visibility = ["//visibility:public"],
+)
 genrule(
     name = "gen_mp_bases_h",
     outs = ["mp_bases.h"],
