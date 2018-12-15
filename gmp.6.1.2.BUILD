@@ -85,11 +85,21 @@ cc_library(
     copts = ["-Wno-unused-variable"],
 )
 
+################################################################################
+
 ### mpf
 cc_library(
     name = "mpf",
     srcs = glob(["mpf/*.c"]),
     hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + glob(["mpf/*.h", "gmp-impl.h", "longlong.h"]),
+    visibility = ["//visibility:public"],
+)
+
+### mpq
+cc_library(
+    name = "mpq",
+    srcs = glob(["mpq/*.c"]),
+    hdrs = [":gmp_hdrs", ":gen_fib_table_h", ":gen_fac_table_h", ":gen_mp_bases_h"] + glob(["mpq/*.h", "gmp-impl.h", "longlong.h"]),
     visibility = ["//visibility:public"],
 )
 
