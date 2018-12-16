@@ -1,9 +1,16 @@
 ### Rules based on compiler/platform
 
 config_setting(
-    name = "Wno_unused_variable",
+    name = "Wno_unused_variable_linux",
     constraint_values = [
         "@bazel_tools//platforms:linux",
+    ]
+)
+
+config_setting(
+    name = "Wno_unused_variable_osx",
+    constraint_values = [
+        "@bazel_tools//platforms:osx",
     ]
 )
 
@@ -56,7 +63,8 @@ cc_library(
     srcs = ["gen-fac.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
     copts = select({
-        ":Wno_unused_variable": ["-Wno-unused-variable"],
+        ":Wno_unused_variable_linux": ["-Wno-unused-variable"],
+        ":Wno_unused_variable_osx": ["-Wno-unused-variable"],
         "//conditions:default": [],
     }),
 )
@@ -88,7 +96,8 @@ cc_library(
     srcs = ["gen-fib.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
     copts = select({
-        ":Wno_unused_variable": ["-Wno-unused-variable"],
+        ":Wno_unused_variable_linux": ["-Wno-unused-variable"],
+        ":Wno_unused_variable_osx": ["-Wno-unused-variable"],
         "//conditions:default": [],
     }),
 )
@@ -139,7 +148,8 @@ cc_library(
     srcs = ["gen-bases.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
     copts = select({
-        ":Wno_unused_variable": ["-Wno-unused-variable"],
+        ":Wno_unused_variable_linux": ["-Wno-unused-variable"],
+        ":Wno_unused_variable_osx": ["-Wno-unused-variable"],
         "//conditions:default": [],
     }),
 )
@@ -334,9 +344,10 @@ cc_binary(
     deps = [":mpf", ":mpz", ":mpq", ":mpn", ":printf", ":scanf", ":random"],
     visibility = ["//visibility:public"],
     copts = select({
-        ":Wno_unused_variable": ["-Wno-unused-variable"],
+        ":Wno_unused_variable_linux": ["-Wno-unused-variable"],
+        ":Wno_unused_variable_osx": ["-Wno-unused-variable"],
         "//conditions:default": [],
-    })
+    }),
 )
 
 ### gmpxx
