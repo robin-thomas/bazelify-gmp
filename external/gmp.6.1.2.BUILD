@@ -1,3 +1,21 @@
+### Rules based on compiler/platform
+
+config_setting(
+    name = "Wno_unused_variable",
+    constraint_values = [
+        "@bazel_tools//platforms:linux",
+    ]
+)
+
+config_setting(
+    name = "Wno_unused_but_set_variable",
+    constraint_values = [
+        "@bazel_tools//platforms:linux",
+    ]
+)
+
+################################################################################
+
 # Unable to get the new http_archive gets working unless the BUILD
 # file is under external/
 # Refer: https://stackoverflow.com/questions/51802681/does-bazel-need-external-repo-build-files-to-be-in-workspace-root-external
@@ -37,7 +55,10 @@ cc_library(
     name = "gen_fac_deps",
     srcs = ["gen-fac.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
-    copts = ["-Wno-unused-variable"],
+    copts = select({
+        ":Wno_unused_variable": ["-Wno-unused-variable"],
+        "//conditions:default": [],
+    }),
 )
 
 ### fib-table.*
@@ -66,7 +87,10 @@ cc_library(
     name = "gen_fib_deps",
     srcs = ["gen-fib.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
-    copts = ["-Wno-unused-variable"],
+    copts = select({
+        ":Wno_unused_variable": ["-Wno-unused-variable"],
+        "//conditions:default": [],
+    }),
 )
 
 ### jacobitab.h
@@ -86,7 +110,6 @@ cc_library(
     name = "gen_jacobitab_deps",
     srcs = ["gen-jacobitab.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
-    copts = ["-Wno-unused-variable"],
 )
 
 ### mp_bases.*
@@ -115,7 +138,10 @@ cc_library(
     name = "gen_bases_deps",
     srcs = ["gen-bases.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
-    copts = ["-Wno-unused-variable"],
+    copts = select({
+        ":Wno_unused_variable": ["-Wno-unused-variable"],
+        "//conditions:default": [],
+    }),
 )
 
 ### perfsqr.h
@@ -135,7 +161,6 @@ cc_library(
     name = "gen_perfsqr_deps",
     srcs = ["gen-perfsqr.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
-    copts = ["-Wno-unused-variable"],
 )
 
 ### trialdivtab.h
@@ -155,7 +180,6 @@ cc_library(
     name = "gen_trialdivtab_deps",
     srcs = ["gen-trialdivtab.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
-    copts = ["-Wno-unused-variable"],
 )
 
 ################################################################################
@@ -169,7 +193,10 @@ cc_library(
         ":gen_fib_table_h",
         ":gen_fac_table_h",
         ":gen_mp_bases_h"] + ["gmp-impl.h"],
-    copts = ["-Wno-unused-but-set-variable"],
+    copts = select({
+        ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
+        "//conditions:default": [],
+    }),
 )
 
 ### mpf
@@ -230,7 +257,10 @@ cc_library(
         "gmp-impl.h",
         "longlong.h"
     ],
-    copts = ["-Wno-unused-but-set-variable"],
+    copts = select({
+        ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
+        "//conditions:default": [],
+    }),
 )
 
 ### random
@@ -245,7 +275,10 @@ cc_library(
         "gmp-impl.h",
         "longlong.h"
     ],
-    copts = ["-Wno-unused-but-set-variable"],
+    copts = select({
+        ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
+        "//conditions:default": [],
+    }),
 )
 
 ### scanf
@@ -259,8 +292,10 @@ cc_library(
         ":gen_mp_bases_h",
         "gmp-impl.h"
     ],
-    alwayslink = 1,
-    copts = ["-Wno-unused-but-set-variable"],
+    copts = select({
+        ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
+        "//conditions:default": [],
+    }),
     visibility = ["//visibility:public"],
 )
 
@@ -298,7 +333,10 @@ cc_binary(
     linkopts = ["-shared"],
     deps = [":mpf", ":mpz", ":mpq", ":mpn", ":printf", ":scanf", ":random"],
     visibility = ["//visibility:public"],
-    copts = ["-Wno-unused-variable"],
+    copts = select({
+        ":Wno_unused_variable": ["-Wno-unused-variable"],
+        "//conditions:default": [],
+    })
 )
 
 ### gmpxx
