@@ -33,26 +33,34 @@ genrule(
         "config.h",
         "gmp.h",
         "gmp-mparam.h",
+        "gmp_limb_bits",
+        "gmp_nail_bits",
     ],
     cmd = """
         cd external/gmp_6_1_2
         ./configure >/dev/null
+        cat gmp.h | grep "#define GMP_LIMB_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_limb_bits
+        cat gmp.h | grep "#define GMP_NAIL_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_nail_bits
         cd ../..
         cp external/gmp_6_1_2/config.h $(location config.h)
         cp external/gmp_6_1_2/gmp.h $(location gmp.h)
+        cp external/gmp_6_1_2/gmp_limb_bits $(location gmp_limb_bits)
+        cp external/gmp_6_1_2/gmp_nail_bits $(location gmp_nail_bits)
         cp external/gmp_6_1_2/gmp-mparam.h $(location gmp-mparam.h)
     """,
+    visibility = ["//visibility:public"],
 )
 
 ### fac_table.h
-#TODO: figure out how to get the value of 64 and 0 from configure script
 genrule(
     name = "gen_fac_table_h",
+    srcs = ["gmp_nail_bits", "gmp_limb_bits"],
     outs = ["fac_table.h"],
     tools = [":gen_fac"],
     cmd = """
-        $(location gen_fac) 64 0 > $@
+        $(location gen_fac) `cat $(location gmp_limb_bits)` `cat $(location gmp_nail_bits)` > $@
     """,
+    visibility = ["//visibility:public"],
 )
 cc_binary(
     name = "gen_fac",
@@ -70,21 +78,22 @@ cc_library(
 )
 
 ### fib-table.*
-#TODO: figure out how to get the value of 64 and 0 from configure script
 genrule(
     name = "gen_fib_table_c",
+    srcs = ["gmp_nail_bits", "gmp_limb_bits"],
     outs = ["fib_table.c"],
     tools = [":gen_fib"],
     cmd = """
-        $(location gen_fib) table 64 0 > $@
+        $(location gen_fib) table `cat $(location gmp_limb_bits)` `cat $(location gmp_nail_bits)` > $@
     """,
 )
 genrule(
     name = "gen_fib_table_h",
+    srcs = ["gmp_nail_bits", "gmp_limb_bits"],
     outs = ["fib_table.h"],
     tools = [":gen_fib"],
     cmd = """
-        $(location gen_fib) header 64 0 > $@
+        $(location gen_fib) header `cat $(location gmp_limb_bits)` `cat $(location gmp_nail_bits)` > $@
     """,
 )
 cc_binary(
@@ -122,21 +131,22 @@ cc_library(
 )
 
 ### mp_bases.*
-#TODO: figure out how to get the value of 64 and 0 from configure script
 genrule(
     name = "gen_mp_bases_c",
+    srcs = ["gmp_nail_bits", "gmp_limb_bits"],
     outs = ["mp_bases.c"],
     tools = [":gen_bases"],
     cmd = """
-        $(location gen_bases) table 64 0 > $@
+        $(location gen_bases) table `cat $(location gmp_limb_bits)` `cat $(location gmp_nail_bits)` > $@
     """,
 )
 genrule(
     name = "gen_mp_bases_h",
+    srcs = ["gmp_nail_bits", "gmp_limb_bits"],
     outs = ["mp_bases.h"],
     tools = [":gen_bases"],
     cmd = """
-        $(location gen_bases) header 64 0 > $@
+        $(location gen_bases) header `cat $(location gmp_limb_bits)` `cat $(location gmp_nail_bits)` > $@
     """,
 )
 cc_binary(
@@ -176,10 +186,11 @@ cc_library(
 ### trialdivtab.h
 genrule(
     name = "gen_trialdivtab_h",
+    srcs = ["gmp_limb_bits"],
     outs = ["trialdivtab.h"],
     tools = [":gen_trialdivtab"],
     cmd = """
-        $(location gen_trialdivtab) 64 8000 > $@
+        $(location gen_trialdivtab) `cat $(location gmp_limb_bits)` 8000 > $@
     """,
 )
 cc_binary(
