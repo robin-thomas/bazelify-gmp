@@ -35,20 +35,26 @@ genrule(
         "gmp-mparam.h",
         "gmp_limb_bits",
         "gmp_nail_bits",
+        "mpn_generated.tar.gz",
     ],
     cmd = """
         cd external/gmp_6_1_2
         ./configure >/dev/null
         cat gmp.h | grep "#define GMP_LIMB_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_limb_bits
         cat gmp.h | grep "#define GMP_NAIL_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_nail_bits
-        cd ../..
+        cd mpn
+        for file in *.asm; do
+            ./m4-ccas --m4=m4 $(CC) $(CC_FLAGS) -DOPERATION_$${file%.*} -c $${file} -o $${file%.*}.o >/dev/null
+        done
+        tar -czf ../mpn_generated.tar.gz *.o *.c
+        cd ../../..
         cp external/gmp_6_1_2/config.h $(location config.h)
         cp external/gmp_6_1_2/gmp.h $(location gmp.h)
         cp external/gmp_6_1_2/gmp_limb_bits $(location gmp_limb_bits)
         cp external/gmp_6_1_2/gmp_nail_bits $(location gmp_nail_bits)
         cp external/gmp_6_1_2/gmp-mparam.h $(location gmp-mparam.h)
+        cp external/gmp_6_1_2/mpn_generated.tar.gz $(location mpn_generated.tar.gz)
     """,
-    visibility = ["//visibility:public"],
 )
 
 ### fac_table.h
@@ -234,14 +240,15 @@ cc_library(
 ### mpn
 cc_library(
     name = "mpn",
-    srcs = [":gen_fib_table_c", ":gen_mp_bases_c"],
+    srcs = [":gen_fib_table_c", ":gen_mp_bases_c", ":gmp_hdrs"]
+            + glob(["mpn/*.c", "mpn/*.o"]),
     hdrs = [
-        ":gmp_hdrs",
         ":gen_fib_table_h",
         ":gen_fac_table_h",
         ":gen_mp_bases_h",
-        "gmp-impl.h"
-    ],
+        "gmp-impl.h",
+        "longlong.h",
+    ] + glob(["mpn/*.h"]),
 )
 
 ### mpq
