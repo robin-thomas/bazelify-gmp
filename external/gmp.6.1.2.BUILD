@@ -44,9 +44,9 @@ genrule(
         cat gmp.h | grep "#define GMP_NAIL_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_nail_bits
         cd mpn
         for file in *.asm; do
-            ./m4-ccas --m4=m4 $(CC) $(CC_FLAGS) -DOPERATION_$${file%.*} -c $${file} -o $${file%.*}.o >/dev/null
+            m4 -DOPERATION_$${file%.*} -I.. $${file} > tmp-$${file%.*}.s
         done
-        tar -czf ../mpn_generated.tar.gz *.o *.c
+        tar -czf ../mpn_generated.tar.gz tmp-*.s *.c
         cd ../../..
         cp external/gmp_6_1_2/config.h $(location config.h)
         cp external/gmp_6_1_2/gmp.h $(location gmp.h)
