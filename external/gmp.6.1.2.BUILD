@@ -37,6 +37,23 @@ genrule(
         "gmp_nail_bits",
         "mpn_generated.tar.gz",
     ],
+    ####
+    # Configure script creates *.asm and *.c files in mpn declare_directory.
+    #
+    # As we do not know the names of these files, it cannot be copied to
+    # output directory (since Bazel requires the names in "outs" beforehand).
+    # So we package all the *.asm and *.c files into a tar.gz, whose name is
+    # mentioned in "outs".
+    #
+    # Bazel do not support the "srcs" of a cc_library to be compressed file.
+    # Hence we use Tree Artifacts to hack the cc_library to compress and get
+    # them all compiled.
+    # Refer: https://stackoverflow.com/questions/48417712/how-to-build-static-library-from-the-generated-source-files-using-bazel-build
+    #
+    # But since these files are symmlinks and Bazel do not allow symlinks inside
+    # a Tree Artifact, whose target is outside the Tree Artifact, we create
+    # copies of *.c files to put inside the tar.gz
+    ####
     cmd = """
         cd external/gmp_6_1_2
         ./configure >/dev/null
@@ -44,9 +61,14 @@ genrule(
         cat gmp.h | grep "#define GMP_NAIL_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_nail_bits
         cd mpn
         for file in *.asm; do
-            m4 -DOPERATION_$${file%.*} -I.. $${file} > tmp-$${file%.*}.s
+            prefix=$${file%.*}
+            m4 -DOPERATION_$${prefix} -I.. $${file} > tmp-$${prefix}.s
         done
-        tar -czf ../mpn_generated.tar.gz tmp-*.s *.c
+        for file in *.c; do
+            cp $${file} tmp-$${file}
+        done
+        tar -czf ../mpn_generated.tar.gz *.s tmp-*.c
+        cp ../mpn_generated.tar.gz /tmp
         cd ../../..
         cp external/gmp_6_1_2/config.h $(location config.h)
         cp external/gmp_6_1_2/gmp.h $(location gmp.h)
@@ -55,6 +77,7 @@ genrule(
         cp external/gmp_6_1_2/gmp-mparam.h $(location gmp-mparam.h)
         cp external/gmp_6_1_2/mpn_generated.tar.gz $(location mpn_generated.tar.gz)
     """,
+    visibility = ["//visibility:public"],
 )
 
 ### fac_table.h
@@ -240,8 +263,8 @@ cc_library(
 ### mpn
 cc_library(
     name = "mpn",
-    srcs = [":gen_fib_table_c", ":gen_mp_bases_c", ":gmp_hdrs"]
-            + glob(["mpn/*.c", "mpn/*.o"]),
+#    srcs = [":gen_fib_table_c", ":gen_mp_bases_c", ":gmp_hdrs", "@//:mpn_asm_tree"],
+    srcs = [":gen_fib_table_c", ":gen_mp_bases_c", ":gmp_hdrs"],
     hdrs = [
         ":gen_fib_table_h",
         ":gen_fac_table_h",
