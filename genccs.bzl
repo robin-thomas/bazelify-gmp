@@ -4,7 +4,6 @@ def _impl(ctx):
     inputs = [],
     outputs = [ tree ],
     arguments = [ tree.path ],
-    progress_message = "Generating cc files into '%s'" % tree.path,
     executable = ctx.executable._tool,
   )
 

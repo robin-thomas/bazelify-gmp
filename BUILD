@@ -26,6 +26,6 @@ sh_binary(
 filegroup(
     name = "dummy_rule",
     srcs = [
-        "@gmp_6_1_2//:libgmp.so",
+        "@gmp_6_1_2//:mpn",
     ],
 )

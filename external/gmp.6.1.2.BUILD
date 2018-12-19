@@ -35,7 +35,6 @@ genrule(
         "gmp-mparam.h",
         "gmp_limb_bits",
         "gmp_nail_bits",
-        "mpn_generated.tar.gz",
     ],
     ####
     # Configure script creates *.asm and *.c files in mpn declare_directory.
@@ -50,32 +49,19 @@ genrule(
     # them all compiled.
     # Refer: https://stackoverflow.com/questions/48417712/how-to-build-static-library-from-the-generated-source-files-using-bazel-build
     #
-    # But since these files are symmlinks and Bazel do not allow symlinks inside
-    # a Tree Artifact, whose target is outside the Tree Artifact, we create
-    # copies of *.c files to put inside the tar.gz
     ####
     cmd = """
         cd external/gmp_6_1_2
         ./configure >/dev/null
         cat gmp.h | grep "#define GMP_LIMB_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_limb_bits
         cat gmp.h | grep "#define GMP_NAIL_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_nail_bits
-        cd mpn
-        for file in *.asm; do
-            prefix=$${file%.*}
-            m4 -DOPERATION_$${prefix} -I.. $${file} > tmp-$${prefix}.s
-        done
-        for file in *.c; do
-            cp $${file} tmp-$${file}
-        done
-        tar -czf ../mpn_generated.tar.gz *.s tmp-*.c
-        cp ../mpn_generated.tar.gz /tmp
-        cd ../../..
+
+        cd ../..
         cp external/gmp_6_1_2/config.h $(location config.h)
         cp external/gmp_6_1_2/gmp.h $(location gmp.h)
         cp external/gmp_6_1_2/gmp_limb_bits $(location gmp_limb_bits)
         cp external/gmp_6_1_2/gmp_nail_bits $(location gmp_nail_bits)
         cp external/gmp_6_1_2/gmp-mparam.h $(location gmp-mparam.h)
-        cp external/gmp_6_1_2/mpn_generated.tar.gz $(location mpn_generated.tar.gz)
     """,
     visibility = ["//visibility:public"],
 )
@@ -196,19 +182,25 @@ cc_library(
 ### perfsqr.h
 genrule(
     name = "gen_perfsqr_h",
+    srcs = ["gmp_nail_bits", "gmp_limb_bits"],
     outs = ["perfsqr.h"],
-    tools = [":gen_perfsqr"],
+    tools = [":gen_psqr"],
     cmd = """
-        $(location gen_perfsqr) > $@
+        $(location gen_psqr) `cat $(location gmp_limb_bits)` `cat $(location gmp_nail_bits)`> $@
     """,
 )
 cc_binary(
-    name = "gen_perfsqr",
-    deps = [":gen_perfsqr_deps"],
+    name = "gen_psqr",
+    deps = [":gen_psqr_deps"],
+    copts = select({
+        ":Wno_unused_variable_linux": ["-Wno-unused-variable"],
+        ":Wno_unused_variable_osx": ["-Wno-unused-variable"],
+        "//conditions:default": [],
+    }),
 )
 cc_library(
-    name = "gen_perfsqr_deps",
-    srcs = ["gen-perfsqr.c"],
+    name = "gen_psqr_deps",
+    srcs = ["gen-psqr.c"],
     hdrs = glob(["mini-gmp/mini-gmp.*", "bootstrap.c"]),
 )
 
@@ -261,17 +253,72 @@ cc_library(
 )
 
 ### mpn
+genrule(
+    name = "gen_mpn_objs",
+    srcs = [
+        "fac_table.h",
+        "fib_table.h",
+        "jacobitab.h",
+        "mp_bases.h",
+        "perfsqr.h",
+        "trialdivtab.h",
+    ] + glob(["**/*"]),
+    outs = ["mpn_generated.tar.gz"],
+    cmd = """
+        cp $(location fac_table.h) external/gmp_6_1_2
+        cp $(location fib_table.h) external/gmp_6_1_2
+        cp $(location jacobitab.h) external/gmp_6_1_2
+        cp $(location mp_bases.h) external/gmp_6_1_2
+        cp $(location perfsqr.h) external/gmp_6_1_2
+        cp $(location trialdivtab.h) external/gmp_6_1_2
+
+        cd external/gmp_6_1_2
+        ./configure >/dev/null
+
+        cd mpn
+        CCAS_=`grep "CCAS =" Makefile | cut -d'=' -f2`
+        CPP_FLAGS_="-DHAVE_CONFIG_H -D__GMP_WITHIN_GMP -I. -I.. "
+        CPP_FLAGS_=$${CPP_FLAGS_}`grep "CFLAGS =" Makefile | sed 's/^[^=]*=//g'`
+        for file in *.asm; do
+            prefix=$${file%.*}
+            m4 -DOPERATION_$${prefix} -I.. $${file} > tmp-$${prefix}.s
+            $${CCAS_} -DOPERATION_$${prefix} $${CPP_FLAGS_} tmp-$${prefix}.s -o $${prefix}.o
+            rm -rf tmp-$${prefix}.s
+        done
+        for file in *.c; do
+            prefix=$${file%.*}
+            $${CCAS_} -DOPERATION_$${prefix} $${CPP_FLAGS_} $${file} -o $${prefix}.o
+        done
+        tar -czf mpn_generated.tar.gz *.o
+        cp mpn_generated.tar.gz /tmp
+        cd ../../..
+        cp external/gmp_6_1_2/mpn/mpn_generated.tar.gz $(location mpn_generated.tar.gz)
+    """,
+    visibility = ["//visibility:public"],
+)
 cc_library(
     name = "mpn",
-#    srcs = [":gen_fib_table_c", ":gen_mp_bases_c", ":gmp_hdrs", "@//:mpn_asm_tree"],
-    srcs = [":gen_fib_table_c", ":gen_mp_bases_c", ":gmp_hdrs"],
+    srcs = [
+        ":gen_fib_table_c",
+        ":gen_mp_bases_c",
+        ":gmp_hdrs",
+        "@//:mpn_asm_tree"
+    ],
     hdrs = [
-        ":gen_fib_table_h",
-        ":gen_fac_table_h",
-        ":gen_mp_bases_h",
+        "fib_table.h",
+        "fac_table.h",
+        "mp_bases.h",
+        "trialdivtab.h",
+        "jacobitab.h",
         "gmp-impl.h",
         "longlong.h",
-    ] + glob(["mpn/*.h"]),
+    ],
+    copts = select({
+        ":Wno_unused_variable_linux": ["-Wno-unused-variable"],
+        ":Wno_unused_variable_osx": ["-Wno-unused-variable"],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
 )
 
 ### mpq
