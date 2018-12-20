@@ -29,3 +29,9 @@ filegroup(
         "@gmp_6_1_2//:mpn",
     ],
 )
+
+load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
+
+buildifier(
+    name = "buildifier",
+)
