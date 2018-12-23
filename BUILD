@@ -28,9 +28,9 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "@gmp_6_1_2//:mpf",
-        "@gmp_6_1_2//:mpn",
         "@gmp_6_1_2//:mpq",
         "@gmp_6_1_2//:mpz",
+        "@gmp_6_1_2//:mpn",
         "@gmp_6_1_2//:printf",
         "@gmp_6_1_2//:scanf",
     ],
