@@ -306,37 +306,24 @@ cc_library(
 
 ################################################################################
 
-### cxx
-cc_library(
-    name = "cxx",
-    srcs = glob(["cxx/*.cc"]),
-    hdrs = [
-        ":gmp_hdrs",
-        ":gen_fib_table_h",
-        ":gen_fac_table_h",
-        ":gen_mp_bases_h",
-    ] + ["gmp-impl.h"],
-    copts = select({
-        ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
-        "//conditions:default": [],
-    }),
-    visibility = ["//visibility:public"],
-)
-
 ### mpf
 cc_library(
     name = "mpf",
     srcs = glob(["mpf/*.c"]),
     hdrs = [
         ":gmp_hdrs",
-        ":gen_fib_table_h",
-        ":gen_fac_table_h",
-        ":gen_mp_bases_h",
+        ":fib_table.h",
+        ":fac_table.h",
+        ":mp_bases.h",
     ] + glob([
         "mpf/*.h",
         "gmp-impl.h",
         "longlong.h",
     ]),
+    copts = [
+        "-DHAVE_CONFIG_H",
+        "-D__GMP_WITHIN_GMP",
+    ],
     visibility = ["//visibility:public"],
 )
 
@@ -351,7 +338,10 @@ genrule(
         "perfsqr.h",
         "trialdivtab.h",
     ] + glob(["**/*"]),
-    outs = ["mpn_generated.tar.gz", "libmpn_generated.a"],
+    outs = [
+        "mpn_generated.tar.gz",
+        "libmpn_generated.a",
+    ],
     cmd = """
         cp $(location fac_table.h) external/gmp_6_1_2
         cp $(location fib_table.h) external/gmp_6_1_2
@@ -376,7 +366,7 @@ genrule(
             prefix=$${file%.*}
             $${CCAS_} -DOPERATION_$${prefix} $${CPP_FLAGS_} -Wa,--noexecstack $${file} -fPIC -DPIC -o $${prefix}.o
         done
-        ar cq libmpn_generated.a *.o
+        $(AR) cq libmpn_generated.a *.o
         tar -czf mpn_generated.tar.gz *.o
         cp mpn_generated.tar.gz /tmp
         cd ../../..
@@ -392,7 +382,7 @@ cc_library(
         ":gen_fib_table_c",
         ":gen_mp_bases_c",
         ":gmp_hdrs",
-#        "@//:mpn_asm_tree",
+        #        "@//:mpn_asm_tree",
         "libmpn_generated.a",
     ],
     hdrs = [
@@ -404,12 +394,16 @@ cc_library(
         "mp_bases.h",
         "trialdivtab.h",
     ],
-    copts = select({
+    copts = [
+        "-DHAVE_CONFIG_H",
+        "-D__GMP_WITHIN_GMP",
+    ] + select({
         ":Wno_unused_variable_linux": ["-Wno-unused-variable"],
         ":Wno_unused_variable_osx": ["-Wno-unused-variable"],
         "//conditions:default": [],
     }),
     visibility = ["//visibility:public"],
+    deps = ["gmp-lib"],
 )
 
 ### mpq
@@ -426,24 +420,40 @@ cc_library(
         "gmp-impl.h",
         "longlong.h",
     ]),
+    copts = [
+        "-DHAVE_CONFIG_H",
+        "-D__GMP_WITHIN_GMP",
+    ],
     visibility = ["//visibility:public"],
 )
 
 ### mpz
 cc_library(
     name = "mpz",
-    srcs = glob(["mpz/*.c"]),
+    srcs = ["tal-reent.c"] + glob([
+        "mpz/*.c",
+        "rand/*.c",
+    ]),
     hdrs = [
         ":gmp_hdrs",
-        ":gen_fib_table_h",
-        ":gen_fac_table_h",
-        ":gen_mp_bases_h",
+        "fib_table.h",
+        "fac_table.h",
+        "mp_bases.h",
     ] + glob([
         "mpz/*.h",
+        "rand/*.h",
         "gmp-impl.h",
         "longlong.h",
     ]),
+    copts = [
+        "-DHAVE_CONFIG_H",
+        "-D__GMP_WITHIN_GMP",
+    ] + select({
+        ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
+        "//conditions:default": [],
+    }),
     visibility = ["//visibility:public"],
+    deps = ["gmp-lib"],
 )
 
 ### printf
@@ -458,29 +468,10 @@ cc_library(
         ":gen_mp_bases_h",
         ":gmp_hdrs",
     ],
-    copts = select({
-        ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
-        "//conditions:default": [],
-    }),
-    visibility = ["//visibility:public"],
-)
-
-### random
-cc_library(
-    name = "random",
-    srcs = glob([
-        "rand/*.c",
-        "rand/*.h",
-    ]),
-    hdrs = [
-        "gmp-impl.h",
-        "longlong.h",
-        ":gen_fac_table_h",
-        ":gen_fib_table_h",
-        ":gen_mp_bases_h",
-        ":gmp_hdrs",
-    ],
-    copts = select({
+    copts = [
+        "-DHAVE_CONFIG_H",
+        "-D__GMP_WITHIN_GMP",
+    ] + select({
         ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
         "//conditions:default": [],
     }),
@@ -498,7 +489,10 @@ cc_library(
         ":gen_mp_bases_h",
         ":gmp_hdrs",
     ],
-    copts = select({
+    copts = [
+        "-DHAVE_CONFIG_H",
+        "-D__GMP_WITHIN_GMP",
+    ] + select({
         ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
         "//conditions:default": [],
     }),
@@ -506,16 +500,37 @@ cc_library(
 )
 
 cc_library(
-    name = "gmp_extra",
+    name = "gmp-lib",
     srcs = [
-        "tal-debug.c",
-        "tal-notreent.c",
-        "tal-reent.c",
+        "assert.c",
+        "compat.c",
+        "errno.c",
+        "extract-dbl.c",
+        "invalid.c",
+        "memory.c",
+        "mp_bpl.c",
+        "mp_clz_tab.c",
+        "mp_dv_tab.c",
+        "mp_get_fns.c",
+        "mp_minv_tab.c",
+        "mp_set_fns.c",
+        "nextprime.c",
+        "primesieve.c",
+        "version.c",
     ],
-    hdrs = ["gmp-impl.h", "config.h", "gmp-mparam.h",
-        "fib_table.h", "fac_table.h", "mp_bases.h",
+    hdrs = [
+        "config.h",
+        "fac_table.h",
+        "fib_table.h",
+        "gmp-impl.h",
+        "gmp-mparam.h",
+        "longlong.h",
+        "mp_bases.h",
     ],
-    linkstatic = 1,
+    copts = select({
+        "Wno_unused_variable_linux": ["-Wno-unused-variable"],
+        "Wno_unused_variable_osx": ["-Wno-unused-variable"],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
 )
-
-################################################################################
