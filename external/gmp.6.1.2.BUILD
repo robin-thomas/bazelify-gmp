@@ -49,7 +49,7 @@ m4(
 # file is under external/
 # Refer: https://stackoverflow.com/questions/51802681/does-bazel-need-external-repo-build-files-to-be-in-workspace-root-external
 genrule(
-    name = "gmp_hdrs",
+    name = "gen_gmp_hdrs",
     srcs = glob(["external/gmp_6_1_2/configure"]),
     outs = [
         "config.h",
@@ -316,24 +316,35 @@ cc_library(
     }),
 )
 
+cc_library(
+    name = "gmp_hdrs",
+    hdrs = [
+        "gmp.h",
+        "config.h",
+        "gmp-mparam.h",
+        "fib_table.h",
+        "fac_table.h",
+        "mp_bases.h",
+        "jacobitab.h",
+        "perfsqr.h",
+        "trialdivtab.h",
+    ],
+)
+
 ################################################################################
 
 ### mpf
 cc_library(
     name = "mpf",
     srcs = glob(["mpf/*.c"]),
-    hdrs = [
-        ":gmp_hdrs",
-        ":fib_table.h",
-        ":fac_table.h",
-        ":mp_bases.h",
-    ] + glob([
+    hdrs = glob([
         "mpf/*.h",
         "gmp-impl.h",
         "longlong.h",
     ]),
     copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"],
     visibility = ["//visibility:public"],
+    deps = ["gmp_hdrs"],
 )
 
 ### mpn
@@ -388,33 +399,28 @@ genrule(
     """,
     local = 1,
     visibility = ["//visibility:public"],
-    tools = ["dummy"],
+    tools = select({
+        "has_m4": [],
+        "//conditions:default": ["dummy"],
+    }),
 )
 
 cc_library(
     name = "mpn",
     srcs = [
-        ":gen_fib_table_c",
-        ":gen_mp_bases_c",
-        ":gmp_hdrs",
 #        "@//:mpn_asm_tree",
         "libmpn_generated.a",
     ],
     hdrs = [
-        "fac_table.h",
-        "fib_table.h",
         "gmp-impl.h",
-        "jacobitab.h",
         "longlong.h",
-        "mp_bases.h",
-        "trialdivtab.h",
     ],
     copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"] + select({
         ":Wno_unused_variable_linux": ["-Wno-unused-variable"],
         ":Wno_unused_variable_osx": ["-Wno-unused-variable"],
         "//conditions:default": [],
     }),
-    deps = ["gmp-lib"],
+    deps = ["gmp-lib", "gmp_hdrs"],
     visibility = ["//visibility:public"],
 )
 
@@ -422,30 +428,21 @@ cc_library(
 cc_library(
     name = "mpq",
     srcs = glob(["mpq/*.c"]),
-    hdrs = [
-        ":gmp_hdrs",
-        ":gen_fib_table_h",
-        ":gen_fac_table_h",
-        ":gen_mp_bases_h",
-    ] + glob([
+    hdrs = glob([
         "mpq/*.h",
         "gmp-impl.h",
         "longlong.h",
     ]),
     copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"],
     visibility = ["//visibility:public"],
+    deps = ["gmp_hdrs"],
 )
 
 ### mpz
 cc_library(
     name = "mpz",
     srcs = ["tal-reent.c"] + glob(["mpz/*.c", "rand/*.c"]),
-    hdrs = [
-        ":gmp_hdrs",
-        "fib_table.h",
-        "fac_table.h",
-        "mp_bases.h",
-    ] + glob([
+    hdrs = glob([
         "mpz/*.h",
         "rand/*.h",
         "gmp-impl.h",
@@ -456,7 +453,7 @@ cc_library(
         "//conditions:default": [],
     }),
     visibility = ["//visibility:public"],
-    deps = ["gmp-lib"],
+    deps = ["gmp-lib", "gmp_hdrs"],
 )
 
 ### printf
@@ -466,16 +463,13 @@ cc_library(
     hdrs = [
         "gmp-impl.h",
         "longlong.h",
-        ":gen_fac_table_h",
-        ":gen_fib_table_h",
-        ":gen_mp_bases_h",
-        ":gmp_hdrs",
     ],
     copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"] + select({
         ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
         "//conditions:default": [],
     }),
     visibility = ["//visibility:public"],
+    deps = ["gmp_hdrs"],
 )
 
 ### scanf
@@ -484,16 +478,13 @@ cc_library(
     srcs = glob(["scanf/*.c"]),
     hdrs = [
         "gmp-impl.h",
-        ":gen_fac_table_h",
-        ":gen_fib_table_h",
-        ":gen_mp_bases_h",
-        ":gmp_hdrs",
     ],
     copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"] + select({
         ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
         "//conditions:default": [],
     }),
     visibility = ["//visibility:public"],
+    deps = ["gmp_hdrs"],
 )
 
 ################################################################################
@@ -518,14 +509,8 @@ cc_library(
         "version.c",
     ],
     hdrs = [
-        "config.h",
         "gmp-impl.h",
-        "fib_table.h",
-        "fac_table.h",
-        "gmp-mparam.h",
-        "mp_bases.h",
         "longlong.h",
-        "gmp.h",
     ],
     copts = select({
         "Wno_unused_variable_linux": ["-Wno-unused-variable"],
@@ -533,6 +518,7 @@ cc_library(
         "//conditions:default": [],
     }),
     visibility = ["//visibility:public"],
+    deps = ["gmp_hdrs"],
 )
 
 cc_library(
