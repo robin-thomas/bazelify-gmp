@@ -8,13 +8,6 @@ http_archive(
     url = "https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz",
 )
 
-http_archive(
-    name = "gmp_win",
-    build_file = "gmp.6.1.2.win.BUILD",
-    strip_prefix = "bin",
-    url = "https://nchc.dl.sourceforge.net/project/mingw/MinGW/Base/gmp/gmp-6.1.2/libgmp-6.1.2-2-mingw32-dll-10.tar.xz",
-)
-
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(

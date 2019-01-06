@@ -5,7 +5,7 @@ exports_files([
 ### Rules based on compiler/platform
 
 config_setting(
-    name = "build_m4",
+    name = "has_m4",
     constraint_values = [
         "@bazel_tools//platforms:windows",
     ],
@@ -95,7 +95,10 @@ genrule(
     """,
     local = 1,
     visibility = ["//visibility:public"],
-    tools = ["dummy"],
+    tools = select({
+        "has_m4": [],
+        "//conditions:default": ["dummy"],
+    }),
 )
 
 ### fac_table.h
