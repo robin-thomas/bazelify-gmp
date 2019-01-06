@@ -37,16 +37,12 @@ config_setting(
 
 ################################################################################
 
-load("@//:m4.bzl", "m4")
+load("@io_bazel_rules_m4//:m4.bzl", "m4")
 
 m4(
     name = "hdrs",
     srcs = ["gmp-h.in"],
     out = "dummy",
-    build = select({
-        "build_m4": "no",
-        "//conditions:default": "yes"
-    }),
 )
 
 # Unable to get the new http_archive gets working unless the BUILD
@@ -68,11 +64,9 @@ genrule(
     ],
     cmd = """
         if [ ! -f $(location gmp.h) ]; then
-          has_m4=`which m4`
-          if [ -z $${has_m4} ]; then
-            m4_PATH=`pwd`"/bazel-out/host/bin/external/m4_v1.4.18/bin"
-            export PATH=$${PATH}:$${m4_PATH}
-          fi
+          m4_PATH=`pwd`"/bazel-out/host/bin/external/m4_v1.4.18/bin"
+          PATH=$${PATH}:$${m4_PATH}
+
           cd external/gmp_6_1_2
           ./configure >/dev/null
           cat gmp.h | grep "#define GMP_LIMB_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_limb_bits
@@ -360,11 +354,8 @@ genrule(
     outs = ["mpn_generated.tar.gz", "libmpn_generated.a"],
     cmd = """
         if [ ! -f $(location mpn_generated.tar.gz) ]; then
-          has_m4=`which m4`
-          if [ -z $${has_m4} ]; then
-            m4_PATH=`pwd`"/bazel-out/host/bin/external/m4_v1.4.18/bin"
-            PATH=$${PATH}:$${m4_PATH}
-          fi
+          m4_PATH=`pwd`"/bazel-out/host/bin/external/m4_v1.4.18/bin"
+          PATH=$${PATH}:$${m4_PATH}
 
           CCAS_=`cat $(location ccas)`
           CPP_FLAGS_=`cat $(location cpp_flags)`
@@ -539,4 +530,17 @@ cc_library(
         "//conditions:default": [],
     }),
     visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "libgmp",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":mpf",
+        ":mpq",
+        ":mpz",
+        ":mpn",
+        ":printf",
+        ":scanf",
+  ],
 )

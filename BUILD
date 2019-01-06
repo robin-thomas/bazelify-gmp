@@ -22,16 +22,18 @@ sh_binary(
     visibility = ["//visibility:public"],
 )
 
-### gmp
+config_setting(
+    name = "gmp_win_select_dll",
+    constraint_values = [
+        "@bazel_tools//platforms:windows",
+    ],
+)
+
 cc_library(
     name = "gmp",
     visibility = ["//visibility:public"],
-    deps = [
-        "@gmp_6_1_2//:mpf",
-        "@gmp_6_1_2//:mpq",
-        "@gmp_6_1_2//:mpz",
-        "@gmp_6_1_2//:mpn",
-        "@gmp_6_1_2//:printf",
-        "@gmp_6_1_2//:scanf",
-  ],
+    deps = select({
+        ":gmp_win_select_dll": ["@gmp_win//:libgmp_win"],
+        "//conditions:default": ["@gmp_6_1_2//:libgmp"],
+    }),
 )
