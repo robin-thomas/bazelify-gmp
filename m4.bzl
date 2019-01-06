@@ -20,16 +20,12 @@ load(
     _m4_context = "m4_context",
 )
 
-_LATEST = "1.4.18"
+_LATEST = "1.4.14"
 
 _VERSION_URLS = {
-    "1.4.18": {
-        "urls": ["https://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.xz"],
-        "sha256": "f2c1e86ca0a404ff281631bdc8377638992744b175afb806e25871a24a934e07",
+    "1.4.15": {
+        "urls": ["https://ftp.gnu.org/gnu/m4/m4-1.4.14.tar.xz"],
     },
-    "1.4.14-1-src": {
-        "urls": ["http://downloads.sourceforge.net/gnuwin32/m4-1.4.14-1-src.zip"],
-    }
 }
 
 M4_VERSIONS = list(_VERSION_URLS)
