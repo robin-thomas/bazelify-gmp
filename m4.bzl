@@ -23,7 +23,7 @@ load(
 _LATEST = "1.4.14"
 
 _VERSION_URLS = {
-    "1.4.15": {
+    "1.4.14": {
         "urls": ["https://ftp.gnu.org/gnu/m4/m4-1.4.14.tar.xz"],
     },
 }
