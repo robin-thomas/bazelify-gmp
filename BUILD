@@ -1,15 +1,3 @@
-load("//:m4.bzl", "m4")
-
-m4(
-    name = "hdrs",
-    srcs = ["dummy.in"],
-    out = "dummy",
-    build = select({
-        "@bazel_tools//platforms:windows": "false",
-        "//conditions:default": "true",
-    }),
-)
-
 load(":genccs.bzl", "genccs")
 
 genccs(
@@ -46,10 +34,4 @@ cc_library(
         "@gmp_6_1_2//:printf",
         "@gmp_6_1_2//:scanf",
   ],
-)
-
-load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
-
-buildifier(
-    name = "buildifier",
 )

@@ -5,6 +5,13 @@ exports_files([
 ### Rules based on compiler/platform
 
 config_setting(
+    name = "build_m4",
+    constraint_values = [
+        "@bazel_tools//platforms:windows",
+    ],
+)
+
+config_setting(
     name = "Wno_unused_variable_linux",
     constraint_values = [
         "@bazel_tools//platforms:linux",
@@ -30,15 +37,15 @@ config_setting(
 
 ################################################################################
 
-load("//:m4.bzl", "m4")
+load("@//:m4.bzl", "m4")
 
 m4(
     name = "hdrs",
     srcs = ["gmp-h.in"],
     out = "dummy",
     build = select({
-        "@bazel_tools//platforms:windows": "false",
-        "//conditions:default": "true"
+        "build_m4": "no",
+        "//conditions:default": "yes"
     }),
 )
 
@@ -64,7 +71,7 @@ genrule(
           has_m4=`which m4`
           if [ -z $${has_m4} ]; then
             m4_PATH=`pwd`"/bazel-out/host/bin/external/m4_v1.4.18/bin"
-            PATH=$${PATH}:$${m4_PATH}
+            export PATH=$${PATH}:$${m4_PATH}
           fi
           cd external/gmp_6_1_2
           ./configure >/dev/null
