@@ -1,3 +1,8 @@
+exports_files([
+  "gmp.h",
+  "gmpxx.h",
+])
+
 cc_import(
     name = "libgmp",
     hdrs = [
