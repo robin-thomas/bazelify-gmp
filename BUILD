@@ -1,3 +1,8 @@
+exports_files([
+    "gmp.h",
+    "gmpxx.h",
+])
+
 load(":genccs.bzl", "genccs")
 
 genccs(

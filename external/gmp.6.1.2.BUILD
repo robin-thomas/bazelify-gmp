@@ -50,7 +50,7 @@ m4(
 # Refer: https://stackoverflow.com/questions/51802681/does-bazel-need-external-repo-build-files-to-be-in-workspace-root-external
 genrule(
     name = "gen_gmp_hdrs",
-    srcs = glob(["external/gmp_6_1_2/configure"]),
+    srcs = glob(["**"]),
     outs = [
         "config.h",
         "gmp.h",
@@ -78,10 +78,9 @@ genrule(
           CPP_FLAGS_=$${CPP_FLAGS_}`grep "CFLAGS =" Makefile | sed 's/^[^=]*=//g'`
           echo $${CPP_FLAGS_} > cpp_flags
 
-          cd mpn
-          tar -czf mpn_srcs.tar.gz *.asm *.c
+          tar -czf mpn_srcs.tar.gz mpn/*
 
-          cd ../../..
+          cd ../..
           cp external/gmp_6_1_2/config.h $(location config.h)
           cp external/gmp_6_1_2/gmp.h $(location gmp.h)
           cp external/gmp_6_1_2/gmp_limb_bits $(location gmp_limb_bits)
@@ -90,10 +89,9 @@ genrule(
           cp external/gmp_6_1_2/config.m4 $(location config.m4)
           cp external/gmp_6_1_2/ccas $(location ccas)
           cp external/gmp_6_1_2/cpp_flags $(location cpp_flags)
-          cp external/gmp_6_1_2/mpn/mpn_srcs.tar.gz $(location mpn_srcs.tar.gz)
+          cp external/gmp_6_1_2/mpn_srcs.tar.gz $(location mpn_srcs.tar.gz)
         fi
     """,
-    local = 1,
     visibility = ["//visibility:public"],
     tools = select({
         "has_m4": [],
@@ -358,6 +356,8 @@ genrule(
         "perfsqr.h",
         "trialdivtab.h",
         "gmp.h",
+        "gmp-impl.h",
+        "longlong.h",
         "config.h",
         "gmp-mparam.h",
         "config.m4",
@@ -376,8 +376,8 @@ genrule(
           config_path=`pwd`"/"`dirname $(location config.m4)`
           mpn_srcs_path=`pwd`"/"$(location mpn_srcs.tar.gz)
 
-          cd external/gmp_6_1_2/mpn
           tar xzf $${mpn_srcs_path}
+          cd mpn
           ln -s $${config_path}/config.m4 ../config.m4
 
           for file in *.asm; do
@@ -387,17 +387,18 @@ genrule(
           done
           for file in *.c; do
               prefix=$${file%.*}
-              $${CCAS_} -DOPERATION_$${prefix} $${CPP_FLAGS_} -I$${config_path} -Wa,--noexecstack $${file} -fPIC -DPIC -o $${prefix}.o
+              $${CCAS_} -DOPERATION_$${prefix} $${CPP_FLAGS_} -I../external/gmp_6_1_2 -I$${config_path} -Wa,--noexecstack $${file} -fPIC -DPIC -o $${prefix}.o
           done
+
           ar cq libmpn_generated.a *.o
           tar -czf mpn_generated.tar.gz *.o
           cp mpn_generated.tar.gz /tmp
-          cd ../../..
-          cp external/gmp_6_1_2/mpn/mpn_generated.tar.gz $(location mpn_generated.tar.gz)
-          cp external/gmp_6_1_2/mpn/libmpn_generated.a $(location libmpn_generated.a)
+
+          cd ..
+          cp mpn/mpn_generated.tar.gz $(location mpn_generated.tar.gz)
+          cp mpn/libmpn_generated.a $(location libmpn_generated.a)
         fi
     """,
-    local = 1,
     visibility = ["//visibility:public"],
     tools = select({
         "has_m4": [],
