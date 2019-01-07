@@ -8,13 +8,6 @@ http_archive(
     url = "https://gmplib.org/download/gmp/gmp-6.1.2.tar.xz",
 )
 
-http_archive(
-    name = "gmp_win",
-    build_file = "gmp.6.1.2.win.BUILD",
-    strip_prefix = "gmp",
-    url = "https://cs.nyu.edu/exact/core/gmp/gmp-static-mingw-4.1.tar.gz",
-)
-
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 git_repository(

@@ -1,8 +1,3 @@
-exports_files([
-    "gmp.h",
-    "gmpxx.h",
-])
-
 load(":genccs.bzl", "genccs")
 
 genccs(
@@ -38,7 +33,7 @@ cc_library(
     name = "gmp",
     visibility = ["//visibility:public"],
     deps = select({
-        ":gmp_win_select_dll": ["@gmp_win//:libgmp_win"],
+        ":gmp_win_select_dll": ["//gmp_6_1_2_win:libgmp"],
         "//conditions:default": ["@gmp_6_1_2//:libgmp"],
     }),
 )
