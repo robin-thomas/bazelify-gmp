@@ -18,7 +18,7 @@ genrule(
 sh_binary(
     name = "genccs",
     srcs = [":mpn_generated"],
-    data = ["@gmp_6_1_2//:mpn_generated.tar.gz"],
+    data = ["//gmp_6_1_2:mpn_generated.tar.gz"],
     visibility = ["//visibility:public"],
 )
 
@@ -34,6 +34,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = select({
         ":gmp_win_select_dll": ["//gmp_6_1_2_win:libgmp"],
-        "//conditions:default": ["@gmp_6_1_2//:libgmp"],
+        "//conditions:default": ["//gmp_6_1_2:libgmp"],
     }),
 )
