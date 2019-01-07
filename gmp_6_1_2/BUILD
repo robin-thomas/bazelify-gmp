@@ -67,6 +67,7 @@ genrule(
           m4_PATH=`pwd`"/bazel-out/host/bin/external/m4_v1.4.18/bin"
           PATH=$${PATH}:$${m4_PATH}
 
+          [ -d external/bazelify_gmp ] && cd external/bazelify_gmp
           cd gmp_6_1_2
           ./configure >/dev/null
           cat gmp.h | grep "#define GMP_LIMB_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_limb_bits
@@ -81,15 +82,28 @@ genrule(
           tar -czf mpn_srcs.tar.gz mpn/*
 
           cd ../
-          cp gmp_6_1_2/config.h $(location config.h)
-          cp gmp_6_1_2/gmp.h $(location gmp.h)
-          cp gmp_6_1_2/gmp_limb_bits $(location gmp_limb_bits)
-          cp gmp_6_1_2/gmp_nail_bits $(location gmp_nail_bits)
-          cp gmp_6_1_2/gmp-mparam.h $(location gmp-mparam.h)
-          cp gmp_6_1_2/config.m4 $(location config.m4)
-          cp gmp_6_1_2/ccas $(location ccas)
-          cp gmp_6_1_2/cpp_flags $(location cpp_flags)
-          cp gmp_6_1_2/mpn_srcs.tar.gz $(location mpn_srcs.tar.gz)
+          [ -d ../../external/bazelify_gmp ] && cd ../..
+          if [ -d external/bazelify_gmp ]; then
+            cp external/bazelify_gmp/gmp_6_1_2/config.h $(location config.h)
+            cp external/bazelify_gmp/gmp_6_1_2/gmp.h $(location gmp.h)
+            cp external/bazelify_gmp/gmp_6_1_2/gmp_limb_bits $(location gmp_limb_bits)
+            cp external/bazelify_gmp/gmp_6_1_2/gmp_nail_bits $(location gmp_nail_bits)
+            cp external/bazelify_gmp/gmp_6_1_2/gmp-mparam.h $(location gmp-mparam.h)
+            cp external/bazelify_gmp/gmp_6_1_2/config.m4 $(location config.m4)
+            cp external/bazelify_gmp/gmp_6_1_2/ccas $(location ccas)
+            cp external/bazelify_gmp/gmp_6_1_2/cpp_flags $(location cpp_flags)
+            cp external/bazelify_gmp/gmp_6_1_2/mpn_srcs.tar.gz $(location mpn_srcs.tar.gz)
+          else
+            cp gmp_6_1_2/config.h $(location config.h)
+            cp gmp_6_1_2/gmp.h $(location gmp.h)
+            cp gmp_6_1_2/gmp_limb_bits $(location gmp_limb_bits)
+            cp gmp_6_1_2/gmp_nail_bits $(location gmp_nail_bits)
+            cp gmp_6_1_2/gmp-mparam.h $(location gmp-mparam.h)
+            cp gmp_6_1_2/config.m4 $(location config.m4)
+            cp gmp_6_1_2/ccas $(location ccas)
+            cp gmp_6_1_2/cpp_flags $(location cpp_flags)
+            cp gmp_6_1_2/mpn_srcs.tar.gz $(location mpn_srcs.tar.gz)
+          fi
         fi
     """,
     visibility = ["//visibility:public"],
@@ -340,7 +354,12 @@ cc_library(
         "gmp-impl.h",
         "longlong.h",
     ]),
-    copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"] + ["-Igmp_6_1_2", "-I$(GENDIR)/gmp_6_1_2"],
+    copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"] + [
+        "-Igmp_6_1_2",
+        "-Iexternal/bazelify_gmp/gmp_6_1_2",
+        "-I$(GENDIR)/gmp_6_1_2",
+        "-I$(GENDIR)/external/bazelify_gmp/gmp_6_1_2",
+    ],
     deps = ["gmp_hdrs"],
 )
 
@@ -418,7 +437,12 @@ cc_library(
         ":Wno_unused_variable_linux": ["-Wno-unused-variable"],
         ":Wno_unused_variable_osx": ["-Wno-unused-variable"],
         "//conditions:default": [],
-    }) + ["-Igmp_6_1_2", "-I$(GENDIR)/gmp_6_1_2"],
+    }) + [
+        "-Igmp_6_1_2",
+        "-Iexternal/bazelify_gmp/gmp_6_1_2",
+        "-I$(GENDIR)/gmp_6_1_2",
+        "-I$(GENDIR)/external/bazelify_gmp/gmp_6_1_2",
+    ],
     deps = ["gmp-lib", "gmp_hdrs"],
 )
 
@@ -431,7 +455,12 @@ cc_library(
         "gmp-impl.h",
         "longlong.h",
     ]),
-    copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"] + ["-Igmp_6_1_2", "-I$(GENDIR)/gmp_6_1_2"],
+    copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"] + [
+        "-Igmp_6_1_2",
+        "-Iexternal/bazelify_gmp/gmp_6_1_2",
+        "-I$(GENDIR)/gmp_6_1_2",
+        "-I$(GENDIR)/external/bazelify_gmp/gmp_6_1_2",
+    ],
     deps = ["gmp_hdrs"],
 )
 
@@ -448,7 +477,12 @@ cc_library(
     copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"] + select({
         ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
         "//conditions:default": [],
-    }) + ["-Igmp_6_1_2", "-I$(GENDIR)/gmp_6_1_2"],
+    }) + [
+        "-Igmp_6_1_2",
+        "-Iexternal/bazelify_gmp/gmp_6_1_2",
+        "-I$(GENDIR)/gmp_6_1_2",
+        "-I$(GENDIR)/external/bazelify_gmp/gmp_6_1_2",
+    ],
     deps = ["gmp-lib", "gmp_hdrs"],
 )
 
@@ -463,7 +497,12 @@ cc_library(
     copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"] + select({
         ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
         "//conditions:default": [],
-    }) + ["-Igmp_6_1_2", "-I$(GENDIR)/gmp_6_1_2"],
+    }) + [
+        "-Igmp_6_1_2",
+        "-Iexternal/bazelify_gmp/gmp_6_1_2",
+        "-I$(GENDIR)/gmp_6_1_2",
+        "-I$(GENDIR)/external/bazelify_gmp/gmp_6_1_2",
+    ],
     deps = ["gmp_hdrs"],
 )
 
@@ -477,7 +516,12 @@ cc_library(
     copts = ["-DHAVE_CONFIG_H", "-D__GMP_WITHIN_GMP"] + select({
         ":Wno_unused_but_set_variable": ["-Wno-unused-but-set-variable"],
         "//conditions:default": [],
-    }) + ["-Igmp_6_1_2", "-I$(GENDIR)/gmp_6_1_2"],
+    }) + [
+        "-Igmp_6_1_2",
+        "-Iexternal/bazelify_gmp/gmp_6_1_2",
+        "-I$(GENDIR)/gmp_6_1_2",
+        "-I$(GENDIR)/external/bazelify_gmp/gmp_6_1_2",
+    ],
     deps = ["gmp_hdrs"],
 )
 
@@ -510,7 +554,12 @@ cc_library(
         "Wno_unused_variable_linux": ["-Wno-unused-variable"],
         "Wno_unused_variable_osx": ["-Wno-unused-variable"],
         "//conditions:default": [],
-    }) + ["-Igmp_6_1_2", "-I$(GENDIR)/gmp_6_1_2"],
+    }) + [
+        "-Igmp_6_1_2",
+        "-Iexternal/bazelify_gmp/gmp_6_1_2",
+        "-I$(GENDIR)/gmp_6_1_2",
+        "-I$(GENDIR)/external/bazelify_gmp/gmp_6_1_2",
+    ],
     deps = ["gmp_hdrs"],
 )
 
