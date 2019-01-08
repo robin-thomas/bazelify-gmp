@@ -380,7 +380,7 @@ genrule(
           CPP_FLAGS_=`cat $(location cpp_flags)`
           config_path=`pwd`"/"`dirname $(location config.m4)`
           mpn_srcs_path=`pwd`"/"$(location mpn_srcs.tar.gz)
-          add_path="-I../external/gmp_6_1_2 -I../external/bazelify_gmp/gmp_6_1_2"
+          add_path="-I../gmp_6_1_2 -I../external/bazelify_gmp/gmp_6_1_2"
 
           tar xzf $${mpn_srcs_path}
           cd mpn
@@ -431,6 +431,7 @@ cc_library(
         "-I$(GENDIR)/external/bazelify_gmp/gmp_6_1_2",
     ],
     deps = ["gmp-lib", "gmp_hdrs"],
+    visibility = ["//visibility:public"],
 )
 
 ### mpq
