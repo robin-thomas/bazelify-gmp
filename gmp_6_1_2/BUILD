@@ -413,6 +413,8 @@ genrule(
 cc_library(
     name = "mpn",
     srcs = [
+        "fib_table.c",
+        "mp_bases.c",
 #        "@//:mpn_asm_tree",
         "libmpn_generated.a",
     ],
