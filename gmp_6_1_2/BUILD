@@ -103,6 +103,7 @@ genrule(
         fi
     """,
     local = 1,
+    tools = ["dummy"],
 )
 
 ### fac_table.h
