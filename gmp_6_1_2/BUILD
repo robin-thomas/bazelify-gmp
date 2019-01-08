@@ -328,6 +328,7 @@ cc_library(
         "perfsqr.h",
         "trialdivtab.h",
     ],
+    visibility = ["//visibility:public"],
 )
 
 ################################################################################
@@ -433,7 +434,6 @@ cc_library(
         "-I$(GENDIR)/external/bazelify_gmp/gmp_6_1_2",
     ],
     deps = ["gmp-lib", "gmp_hdrs"],
-    visibility = ["//visibility:public"],
 )
 
 ### mpq
