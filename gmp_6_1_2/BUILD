@@ -60,9 +60,6 @@ genrule(
     ],
     cmd = """
         if [ ! -f $(location gmp.h) ]; then
-          m4_PATH=`pwd`"/bazel-out/host/bin/external/m4_v1.4.18/bin"
-          PATH=$${PATH}:$${m4_PATH}
-
           [ -d external/bazelify_gmp ] && cd external/bazelify_gmp
           cd gmp_6_1_2
 
@@ -103,7 +100,6 @@ genrule(
           fi
         fi
     """,
-    tools = ["dummy"],
     local = 1,
 )
 
