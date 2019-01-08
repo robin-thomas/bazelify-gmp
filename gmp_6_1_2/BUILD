@@ -411,6 +411,7 @@ genrule(
     """,
     tools = ["dummy"],
     visibility = ["//:__pkg__"],
+    local = 1,
 )
 
 cc_library(
