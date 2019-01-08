@@ -7,7 +7,7 @@ genccs(
 
 genrule(
     name = "mpn_generated",
-    srcs = ["@gmp_6_1_2//:mpn_generated.tar.gz"],
+    srcs = ["//gmp_6_1_2:mpn_generated.tar.gz"],
     outs = ["mpn_generated.sh"],
     cmd = """
         echo "#!/bin/sh" > $@

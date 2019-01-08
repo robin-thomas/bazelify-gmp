@@ -5,13 +5,6 @@ exports_files([
 ### Rules based on compiler/platform
 
 config_setting(
-    name = "has_m4",
-    constraint_values = [
-        "@bazel_tools//platforms:windows",
-    ],
-)
-
-config_setting(
     name = "Wno_unused_variable_linux",
     constraint_values = [
         "@bazel_tools//platforms:linux",
@@ -45,12 +38,15 @@ m4(
     out = "dummy",
 )
 
-# Unable to get the new http_archive gets working unless the BUILD
-# file is under external/
-# Refer: https://stackoverflow.com/questions/51802681/does-bazel-need-external-repo-build-files-to-be-in-workspace-root-external
 genrule(
     name = "gen_gmp_hdrs",
-    srcs = glob(["**"]),
+    srcs = glob([
+        "gmp-impl.h",
+        "configure",
+        "mpn/**",
+        "install*",
+        "shtool",
+    ]),
     outs = [
         "config.h",
         "gmp.h",
@@ -69,6 +65,7 @@ genrule(
 
           [ -d external/bazelify_gmp ] && cd external/bazelify_gmp
           cd gmp_6_1_2
+
           ./configure >/dev/null
           cat gmp.h | grep "#define GMP_LIMB_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_limb_bits
           cat gmp.h | grep "#define GMP_NAIL_BITS" | tr -s [:blank:] | cut -f3 -d' ' > gmp_nail_bits
@@ -106,11 +103,7 @@ genrule(
           fi
         fi
     """,
-    visibility = ["//visibility:public"],
-    tools = select({
-        "has_m4": [],
-        "//conditions:default": ["dummy"],
-    }),
+    tools = ["dummy"],
 )
 
 ### fac_table.h
@@ -125,7 +118,6 @@ genrule(
         $(location gen_fac) `cat $(location gmp_limb_bits)` `cat $(location gmp_nail_bits)` > $@
     """,
     tools = [":gen_fac"],
-    visibility = ["//visibility:public"],
 )
 
 cc_binary(
@@ -172,7 +164,6 @@ genrule(
         $(location gen_fib) header `cat $(location gmp_limb_bits)` `cat $(location gmp_nail_bits)` > $@
     """,
     tools = [":gen_fib"],
-    visibility = ["//visibility:public"],
 )
 
 cc_binary(
@@ -243,7 +234,6 @@ genrule(
         $(location gen_bases) header `cat $(location gmp_limb_bits)` `cat $(location gmp_nail_bits)` > $@
     """,
     tools = [":gen_bases"],
-    visibility = ["//visibility:public"],
 )
 
 cc_binary(
@@ -393,6 +383,7 @@ genrule(
           CPP_FLAGS_=`cat $(location cpp_flags)`
           config_path=`pwd`"/"`dirname $(location config.m4)`
           mpn_srcs_path=`pwd`"/"$(location mpn_srcs.tar.gz)
+          add_path="-I../external/gmp_6_1_2 -I../external/bazelify_gmp/gmp_6_1_2"
 
           tar xzf $${mpn_srcs_path}
           cd mpn
@@ -405,7 +396,7 @@ genrule(
           done
           for file in *.c; do
               prefix=$${file%.*}
-              $${CCAS_} -DOPERATION_$${prefix} $${CPP_FLAGS_} -I../external/gmp_6_1_2 -I$${config_path} -Wa,--noexecstack $${file} -fPIC -DPIC -o $${prefix}.o
+              $${CCAS_} -DOPERATION_$${prefix} $${CPP_FLAGS_} $${add_path} -I$${config_path} -Wa,--noexecstack $${file} -fPIC -DPIC -o $${prefix}.o
           done
 
           ar cq libmpn_generated.a *.o
@@ -417,10 +408,8 @@ genrule(
           cp mpn/libmpn_generated.a $(location libmpn_generated.a)
         fi
     """,
-    tools = select({
-        "has_m4": [],
-        "//conditions:default": ["dummy"],
-    }),
+    tools = ["dummy"],
+    visibility = ["//:__pkg__"],
 )
 
 cc_library(
@@ -565,7 +554,7 @@ cc_library(
 
 cc_library(
     name = "libgmp",
-    visibility = ["//visibility:public"],
+    visibility = ["//:__pkg__"],
     deps = [
         ":mpf",
         ":mpq",
